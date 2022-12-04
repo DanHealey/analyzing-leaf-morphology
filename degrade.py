@@ -231,7 +231,7 @@ def degrade_images(images, output_path, z_depth_meters, exposure_factor, random_
     image_paths = []
     for root, dirs, files in os.walk(images, topdown=False):
         for name in files:
-            if os.path.splitext(os.path.join(root, name))[1].lower() == ".tif":
+            if os.path.splitext(os.path.join(root, name))[1].lower() in [".tif", ".tiff", ".jpg", ".png", ".jpeg"]:
                 pathname = os.path.join(root, name)
                 image_paths.append(pathname)
 
@@ -241,7 +241,7 @@ def degrade_images(images, output_path, z_depth_meters, exposure_factor, random_
     for path in image_paths:
         image = skimage.io.imread(path)
         blurred_image = degrader.apply_blur_kernel(image, psf)
-        exposure_adjusted_image = degrader.set_exposure(blurred_image, exposure_factor)
+        # exposure_adjusted_image = degrader.set_exposure(blurred_image, exposure_factor)
 
         if skip_apply_poisson_noise:
             noisy_image = exposure_adjusted_image
@@ -257,8 +257,8 @@ def degrade_images(images, output_path, z_depth_meters, exposure_factor, random_
 
         skimage.io.imsave(output_filename, noisy_image, "pil")
 
-degrade_images('epidermal_data_model/epidermal_data_model',
-                   '/degraded_image_output/',
+degrade_images('processed_images',
+                   'degraded_image_output/',
                    z_depth_meters=2e-6,
                    exposure_factor=1.0,
                    random_seed=0,

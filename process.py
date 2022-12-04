@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import pandas as pd
-from PIL import Image
+import skimage
 
 def parse_args():
     """ Perform command-line argument parsing. """
@@ -30,16 +30,16 @@ def main():
                     print("A jpg file already exists for ", name)
                 # If a jpeg is *NOT* present, create one from the tiff.
                 else:
-                    outfile = os.path.splitext(os.path.join(root, str(count)))[0] + ".jpg"
+                    outfile = "processed_images/" + str(count) + ".jpg"
+                    outfile_blurred = "processed_images/" + str(count) + "-blurred.jpg"
                     try:
-                        im = np.array(Image.open())
+                        im = np.array(skimage.io.imread(os.path.join(root, name)))
                         print("Generating jpg for ", name)
                         print(outfile)
-                        im = im / np.amax(im) * 255
-                        im = Image.fromarray(im.astype(np.uint8))
-                        im.convert("L")
-                        im.thumbnail(im.size)
-                        im.save(outfile)
+                        im = skimage.transform.resize(im, (256, 256), anti_aliasing=True)
+                        im_blurred = skimage.filters.gaussian(im, sigma=1)
+                        skimage.io.imsave(outfile, im)
+                        skimage.io.imsave(outfile_blurred, im_blurred)
                         count+=1
                     except Exception as e:
                         print(e)

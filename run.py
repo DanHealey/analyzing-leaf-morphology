@@ -2,8 +2,7 @@ import os
 import argparse
 
 import tensorflow as tf
-
-from datagen import DataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from models import our_model, paper_model
 
@@ -46,8 +45,8 @@ def parse_args():
 def main():
     """ Main function. """
 
-    img_width, img_height = 500, 500
-    data_dir = './labelled_data'
+    img_width, img_height = 256, 256
+    data_dir = './processed_images'
     epochs = 50
     batch_size = 16
 
@@ -58,18 +57,35 @@ def main():
         model = paper_model(img_width, img_height)
 
     # Get image data 
-    total_images = 490
-    
-    list_IDs = [i for i in range(total_images)]
-    train_IDs = list_IDs[:int(total_images*0.9)]
-    valid_IDs = list_IDs[int(total_images*0.9):]
-    training_generator = DataGenerator(train_IDs)
-    validation_generator = DataGenerator(valid_IDs)
+    train_datagen = ImageDataGenerator(rescale=1./255,
+        shear_range=0.2,
+        zoom_range=0.05,
+        rotation_range=30,
+        horizontal_flip=True,
+        vertical_flip=True,
+        validation_split=0.2)
 
+    train_generator = train_datagen.flow_from_directory(
+        data_dir,
+        target_size=(img_height, img_width),
+        batch_size=batch_size,
+        class_mode='binary',
+        subset='training')
+
+    validation_generator = train_datagen.flow_from_directory(
+        data_dir, 
+        target_size=(img_height, img_width),
+        batch_size=batch_size,
+        class_mode='binary',
+        subset='validation')
 
     #Fit model
-    model.fit_generator(generator=training_generator,
-                    validation_data=validation_generator)
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch = train_generator.samples // batch_size,
+        validation_data = validation_generator, 
+        validation_steps = validation_generator.samples // batch_size,
+        epochs = epochs)
 
     model.summary()
 
