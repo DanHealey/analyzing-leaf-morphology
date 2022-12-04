@@ -2,7 +2,8 @@ import os
 import argparse
 
 import tensorflow as tf
-from keras.preprocessing.image import ImageDataGenerator
+
+from datagen import DataGenerator
 
 from models import our_model, paper_model
 
@@ -56,32 +57,19 @@ def main():
     else:
         model = paper_model(img_width, img_height)
 
-    # Get image data (does not work for .tif images so we would have to convert to jpg/png/etc or use ImageDataGenerator)
-    train_ds = tf.keras.utils.image_dataset_from_directory(
-        data_dir,
-        validation_split=0.2,
-        color_mode="grayscale",
-        subset="training",
-        seed=123,
-        image_size=(img_height, img_width),
-        batch_size=batch_size)
+    # Get image data 
+    total_images = 490
+    
+    list_IDs = [i for i in range(total_images)]
+    train_IDs = list_IDs[:int(total_images*0.9)]
+    valid_IDs = list_IDs[int(total_images*0.9):]
+    training_generator = DataGenerator(train_IDs)
+    validation_generator = DataGenerator(valid_IDs)
 
-    val_ds = tf.keras.utils.image_dataset_from_directory(
-        data_dir,
-        validation_split=0.2,
-        color_mode="grayscale",
-        subset="validation",
-        seed=123,
-        image_size=(img_height, img_width),
-        batch_size=batch_size)
-
-    class_names = train_ds.class_names
 
     #Fit model
-    model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=epochs)
+    model.fit_generator(generator=training_generator,
+                    validation_data=validation_generator)
 
     model.summary()
 
