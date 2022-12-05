@@ -30,7 +30,7 @@ def parse_args():
         you left off, this is how you would load your weights.''')
     parser.add_argument(
         '--data',
-        default='.'+os.sep+'labelled_data'+os.sep,
+        default='.'+os.sep+'epidermal_data_model'+os.sep,
         help='Location where the dataset is stored.')
     parser.add_argument(
         '--evaluate',
@@ -45,8 +45,9 @@ def parse_args():
 def main():
     """ Main function. """
 
+    data_dir = ARGS.data
+
     img_width, img_height = 256, 256
-    data_dir = './processed_images'
     epochs = 50
     batch_size = 16
 
