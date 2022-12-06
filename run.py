@@ -17,7 +17,7 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--model',
-        default='paper',
+        default='ours',
         choices=['ours', 'paper'],
         help='''Which model to run -
         our model (ours), or the model used in the paper (paper).''')
@@ -58,9 +58,9 @@ def main():
         model = paper_model(img_width, img_height)
 
     # Get image data 
-    train_datagen = ImageDataGenerator(rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.05,
+    train_datagen = ImageDataGenerator(
+        samplewise_center=False,
+        samplewise_std_normalization=False,
         rotation_range=30,
         horizontal_flip=True,
         vertical_flip=True,
@@ -70,6 +70,7 @@ def main():
         data_dir,
         target_size=(img_height, img_width),
         batch_size=batch_size,
+        color_mode="grayscale",
         class_mode='binary',
         subset='training')
 
@@ -77,8 +78,20 @@ def main():
         data_dir, 
         target_size=(img_height, img_width),
         batch_size=batch_size,
+        color_mode="grayscale",
         class_mode='binary',
         subset='validation')
+
+    '''
+    #Saves best model weights from training
+    checkpoint = tf.keras.callbacks.ModelCheckpoint(
+        'model_weights.h5', 
+        monitor='loss', 
+        verbose=1, 
+        save_best_only=True, 
+        mode='min',
+        period=1)
+    '''
 
     #Fit model
     model.fit_generator(
@@ -86,9 +99,13 @@ def main():
         steps_per_epoch = train_generator.samples // batch_size,
         validation_data = validation_generator, 
         validation_steps = validation_generator.samples // batch_size,
-        epochs = epochs)
-
-    model.summary()
+        epochs = epochs,
+        #callbacks = [checkpoint]
+        )
+    model.save_weights("model_weights.h5")
+    # model.evaluate()
+    # model.compute_metrics()
+    # model.get_metrics_results()
 
 # Make arguments global
 ARGS = parse_args()
