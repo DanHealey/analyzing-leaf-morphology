@@ -2,12 +2,12 @@ import os
 import argparse
 
 import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
+import datetime
 
 from models import our_model, paper_model
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 
 def parse_args():
     """ Perform command-line argument parsing. """
@@ -38,6 +38,14 @@ def parse_args():
         help='''Skips training and evaluates on the test set once.
         You can use this to test an already trained model by loading
         its checkpoint.''')
+    parser.add_argument(
+        '--batch_size',
+        default=16,
+        help='batch size, integer')
+    parser.add_argument(
+        '--epochs',
+        default=50,
+        help='batch size, integer')
 
     return parser.parse_args()
 
@@ -46,9 +54,12 @@ def main():
     """ Main function. """
 
     img_width, img_height = 256, 256
-    data_dir = './processed_images'
-    epochs = 50
-    batch_size = 16
+    data_dir = 'C:/Users/henrycs/Documents/GitHub/analyzing-leaf-morphology/processed_images'
+    epochs = int(ARGS.epochs)
+    batch_size = int(ARGS.batch_size)
+
+    log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_bs_{b}_epochs_{e}".format(b=batch_size,e=epochs)
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=0,write_graph=False)
 
     #Choose model
     if ARGS.model == "ours":
@@ -80,12 +91,13 @@ def main():
         subset='validation')
 
     #Fit model
-    model.fit_generator(
+    model.fit(
         train_generator,
         steps_per_epoch = train_generator.samples // batch_size,
         validation_data = validation_generator, 
         validation_steps = validation_generator.samples // batch_size,
-        epochs = epochs)
+        epochs = epochs, 
+        callbacks=[tensorboard_callback])
 
     model.summary()
 
