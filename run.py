@@ -53,7 +53,8 @@ def parse_args():
 def main():
     """ Main function. """
 
-    data_dir = ARGS.data
+    train_data_dir = ARGS.data
+    test_data_dir = "./val/"
 
     img_width, img_height = 256, 256
     data_dir = 'C:/Users/henrycs/Documents/GitHub/analyzing-leaf-morphology/processed_images'
@@ -78,8 +79,10 @@ def main():
         vertical_flip=True,
         validation_split=0.2)
 
+    test_datagen = ImageDataGenerator()
+
     train_generator = train_datagen.flow_from_directory(
-        data_dir,
+        train_data_dir,
         target_size=(img_height, img_width),
         batch_size=batch_size,
         color_mode="grayscale",
@@ -87,12 +90,19 @@ def main():
         subset='training')
 
     validation_generator = train_datagen.flow_from_directory(
-        data_dir, 
+        train_data_dir, 
         target_size=(img_height, img_width),
         batch_size=batch_size,
         color_mode="grayscale",
         class_mode='binary',
         subset='validation')
+
+    testing_generator = test_datagen.flow_from_directory(
+        test_data_dir, 
+        target_size=(img_height, img_width),
+        batch_size=batch_size,
+        color_mode="grayscale",
+        class_mode='binary')
 
     '''
     #Saves best model weights from training
@@ -114,9 +124,12 @@ def main():
         epochs = epochs, 
         callbacks=[tensorboard_callback])
         #callbacks = [checkpoint]
+        )
         
     model.save_weights("model_weights.h5")
-    # model.evaluate()
+    model.evaluate(
+        testing_generator
+    )
     # model.compute_metrics()
     # model.get_metrics_results()
 

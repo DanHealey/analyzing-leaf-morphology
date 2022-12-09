@@ -10,3 +10,5 @@ epidermal_data_model/
 epidermal_data_model.zip
 processed_images/
 __pycache__/
+val/
+val.zip
