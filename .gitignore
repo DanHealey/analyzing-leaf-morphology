@@ -8,6 +8,7 @@
 
 epidermal_data_model/
 epidermal_data_model.zip
+training.zip
 processed_images/
 __pycache__/
 val/

@@ -123,8 +123,7 @@ def main():
         validation_steps = validation_generator.samples // batch_size,
         epochs = epochs, 
         callbacks=[tensorboard_callback])
-        #callbacks = [checkpoint]
-        )
+
         
     model.save_weights("model_weights.h5")
     model.evaluate(
