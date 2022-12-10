@@ -3,6 +3,7 @@ import argparse
 
 import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator
+from tensorboard.plugins.hparams import api as hp
 import datetime
 
 from models import our_model, paper_model
@@ -46,6 +47,10 @@ def parse_args():
         '--epochs',
         default=50,
         help='batch size, integer')
+    parser.add_argument(
+        '--optimizer',
+        default='adam',
+        help="'optimizer', 'adam', 'sgd','adadelta','adagrad'")
 
     return parser.parse_args()
 
@@ -67,9 +72,9 @@ def main():
 
     #Choose model
     if ARGS.model == "ours":
-        model = our_model(img_width, img_height)
+        model = our_model(img_width, img_height, ARGS.optimizer)
     else:
-        model = paper_model(img_width, img_height)
+        model = paper_model(img_width, img_height, ARGS.optimizer)
 
     # Get image data 
     train_datagen = ImageDataGenerator(

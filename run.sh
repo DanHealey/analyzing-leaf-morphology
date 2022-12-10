@@ -2,12 +2,12 @@
 #EPOCHS=(25 50 100)
 
 BATCHES=(32)
-EPOCHS=(1)
+OPTIMIZERS = ('optimizer') # 'adam' 'sgd' 'adadelta' 'adagrad')
 
 for bs in "${BATCHES[@]}"; do 
-    for e in "${EPOCHS[@]}"; do 
+    for o in "${OPTIMIZERS[@]}"; do 
         echo $e $bs
-        python run.py --model paper --data ./processed_images --epochs $e --batch_size $bs
+        python run.py --model paper --data ./processed_images --batch_size $bs -- optimizer $o
     done 
 done 
 
