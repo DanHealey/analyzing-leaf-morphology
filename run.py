@@ -51,6 +51,10 @@ def parse_args():
         '--optimizer',
         default='adam',
         help="'optimizer', 'adam', 'sgd','adadelta','adagrad'")
+    parser.add_argument(
+        '--loss',
+        default='binary_crossentropy',
+        help="keras loss fxn")
 
     return parser.parse_args()
 
@@ -59,22 +63,23 @@ def main():
     """ Main function. """
 
     train_data_dir = ARGS.data
-    test_data_dir = "./val/"
+    test_data_dir = "processed_images/val/"
 
     img_width, img_height = 256, 256
     data_dir = 'C:/Users/henrycs/Documents/GitHub/analyzing-leaf-morphology/processed_images'
     epochs = int(ARGS.epochs)
     batch_size = int(ARGS.batch_size)
 
-    log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_bs_{b}_epochs_{e}".format(b=batch_size,e=epochs)
+    runlabel = "_bs_{b}_{o}_{l}".format(b=batch_size,o=ARGS.optimizer,l=ARGS.loss)
+    log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + runlabel[:-13] 
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=0,write_graph=False)
     early_stop_cb = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
 
     #Choose model
     if ARGS.model == "ours":
-        model = our_model(img_width, img_height, ARGS.optimizer)
+        model = our_model(img_width, img_height, optimizer=ARGS.optimizer, loss=ARGS.loss)
     else:
-        model = paper_model(img_width, img_height, ARGS.optimizer)
+        model = paper_model(img_width, img_height,  optimizer=ARGS.optimizer, loss=ARGS.loss)
 
     # Get image data 
     train_datagen = ImageDataGenerator(
