@@ -63,6 +63,7 @@ def main():
 
     log_dir = "logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_bs_{b}_epochs_{e}".format(b=batch_size,e=epochs)
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=0,write_graph=False)
+    early_stop_cb = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
 
     #Choose model
     if ARGS.model == "ours":
@@ -122,7 +123,8 @@ def main():
         validation_data = validation_generator, 
         validation_steps = validation_generator.samples // batch_size,
         epochs = epochs, 
-        callbacks=[tensorboard_callback])
+        callbacks=[tensorboard_callback,
+                    early_stop_cb])
 
         
     model.save_weights("model_weights.h5")
